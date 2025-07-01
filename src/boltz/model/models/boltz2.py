@@ -613,7 +613,6 @@ class Boltz2(LightningModule):
                 + lig_mask[:, None] * lig_mask[None, :]
             )
             z_affinity = z * cross_pair_mask[None, :, :, None]
-            print(dict_out.keys())
 
             # Use all diffusion samples instead of just the best one
             coords_affinity = dict_out["sample_atom_coords"].detach()

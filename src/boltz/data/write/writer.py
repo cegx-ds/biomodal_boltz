@@ -173,8 +173,8 @@ class BoltzWriter(BasePredictionWriter):
                     path = struct_dir / f"{outname}.npz"
                     np.savez_compressed(path, **asdict(new_structure))
 
-                if self.boltz2 and record.affinity and idx_to_rank[model_idx] == 0:
-                    path = struct_dir / f"pre_affinity_{record.id}.npz"
+                if self.boltz2 and record.affinity:
+                    path = struct_dir / f"pre_affinity_{record.id}_model_{idx_to_rank[model_idx]}.npz"
                     np.savez_compressed(path, **asdict(new_structure))
                     np.array(atoms["coords"][:, None], dtype=Coords)
 
@@ -335,7 +335,7 @@ class BoltzAffinityWriter(BasePredictionWriter):
         # Save the affinity summary
         struct_dir = self.output_dir / batch["record"][0].id
         struct_dir.mkdir(exist_ok=True)
-        path = struct_dir / f"affinity_{batch['record'][0].id}.json"
+        path = struct_dir / f"affinity_{batch['record'][0].pre_affinity}.json"
         with path.open("w") as f:
             f.write(json.dumps(affinity_summary, indent=4))
 

@@ -10,6 +10,7 @@ from functools import partial
 from multiprocessing import Pool
 from pathlib import Path
 from typing import Literal, Optional
+from copy import deepcopy
 
 import click
 import torch
@@ -1219,6 +1220,19 @@ def predict(  # noqa: C901, PLR0915, PLR0912
         msg = f"Running affinity prediction for {len(manifest_filtered.records)} input"
         msg += "s." if len(manifest_filtered.records) > 1 else "."
         click.echo(msg)
+
+        # print(manifest_filtered)
+        def _change_manifest_to_include_all_predictions(manifest: Manifest, n_samples) -> Manifest:
+            """Change the manifest to include all predictions."""
+            new_records = []
+            for record in manifest.records:
+                for i in range(n_samples):
+                    new_record = deepcopy(record)
+                    new_record.pre_affinity = f"{record.id}_model_{i}"
+                    new_records.append(new_record)
+            return Manifest(new_records)
+        manifest_filtered = _change_manifest_to_include_all_predictions(manifest_filtered, diffusion_samples)
+        # print(manifest_filtered)
 
         pred_writer = BoltzAffinityWriter(
             data_dir=processed.targets_dir,
