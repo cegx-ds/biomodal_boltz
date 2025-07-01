@@ -613,12 +613,10 @@ class Boltz2(LightningModule):
                 + lig_mask[:, None] * lig_mask[None, :]
             )
             z_affinity = z * cross_pair_mask[None, :, :, None]
+            print(dict_out.keys())
 
-            argsort = torch.argsort(dict_out["iptm"], descending=True)
-            best_idx = argsort[0].item()
-            coords_affinity = dict_out["sample_atom_coords"].detach()[best_idx][
-                None, None
-            ]
+            # Use all diffusion samples instead of just the best one
+            coords_affinity = dict_out["sample_atom_coords"].detach()
             s_inputs = self.input_embedder(feats, affinity=True)
 
             with torch.autocast("cuda", enabled=False):
@@ -628,7 +626,7 @@ class Boltz2(LightningModule):
                         z=z_affinity.detach(),
                         x_pred=coords_affinity,
                         feats=feats,
-                        multiplicity=1,
+                        multiplicity=diffusion_samples,
                         use_kernels=self.use_kernels,
                     )
 
@@ -642,7 +640,7 @@ class Boltz2(LightningModule):
                         z=z_affinity.detach(),
                         x_pred=coords_affinity,
                         feats=feats,
-                        multiplicity=1,
+                        multiplicity=diffusion_samples,
                         use_kernels=self.use_kernels,
                     )
                     dict_out_affinity2["affinity_probability_binary"] = (
@@ -701,7 +699,7 @@ class Boltz2(LightningModule):
                         z=z_affinity.detach(),
                         x_pred=coords_affinity,
                         feats=feats,
-                        multiplicity=1,
+                        multiplicity=diffusion_samples,
                         use_kernels=self.use_kernels,
                     )
                     dict_out.update(

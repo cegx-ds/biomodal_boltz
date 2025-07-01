@@ -393,6 +393,7 @@ def filter_inputs_affinity(
     # Remove them from the input data
     if existing and not override:
         num_skipped = len(existing)
+        manifest = Manifest([r for r in manifest.records if r.id not in existing])
         msg = (
             f"Found some existing affinity predictions ({num_skipped}), "
             f"skipping and running only the missing ones, "
@@ -404,7 +405,7 @@ def filter_inputs_affinity(
         msg = "Found existing affinity predictions, will override."
         click.echo(msg)
 
-    return Manifest([r for r in manifest.records if r.id not in existing])
+    return manifest
 
 
 def compute_msa(
