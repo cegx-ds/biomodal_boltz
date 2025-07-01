@@ -292,23 +292,25 @@ class BoltzAffinityWriter(BasePredictionWriter):
             return
         # Dump affinity summary
         affinity_summary = {}
+        if prediction["iptm"].numel() > 1:
+            # Multiple samples: report all individual values
+            affinity_summary["iptm"] = prediction["iptm"].squeeze().cpu().numpy().tolist()
+        else:
+            # Single sample: keep original format for compatibility
+            affinity_summary["iptm"] = prediction["iptm"].item()
         pred_affinity_value = prediction["affinity_pred_value"]
         pred_affinity_probability = prediction["affinity_probability_binary"]
         
         # Handle multiple diffusion samples
         if pred_affinity_value.numel() > 1:
             # Multiple samples: report all individual values
-            affinity_summary = {
-                "affinity_pred_value": pred_affinity_value.squeeze().cpu().numpy().tolist(),
-                "affinity_probability_binary": pred_affinity_probability.squeeze().cpu().numpy().tolist(),
-            }
+            affinity_summary["affinity_pred_value"] = pred_affinity_value.squeeze().cpu().numpy().tolist()
+            affinity_summary["affinity_probability_binary"] = pred_affinity_probability.squeeze().cpu().numpy().tolist()
         else:
             # Single sample: keep original format for compatibility
-            affinity_summary = {
-                "affinity_pred_value": pred_affinity_value.item(),
-                "affinity_probability_binary": pred_affinity_probability.item(),
-            }
-        
+            affinity_summary["affinity_pred_value"] = pred_affinity_value.item()
+            affinity_summary["affinity_probability_binary"] = pred_affinity_probability.item()
+
         if "affinity_pred_value1" in prediction:
             pred_affinity_value1 = prediction["affinity_pred_value1"]
             pred_affinity_probability1 = prediction["affinity_probability_binary1"]
