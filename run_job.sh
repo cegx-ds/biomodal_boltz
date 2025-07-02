@@ -49,4 +49,4 @@ boltz predict \
     --out_dir "$FOLDING_DIRECTORY" \
 
 # save folding output files
-cp --recursive "$FOLDING_DIRECTORY/predictions/"* "$MOUNTED_BUCKET_OUTPUT_DIRECTORY"
+cp --recursive $FOLDING_DIRECTORY/boltz_results*/predictions "$MOUNTED_BUCKET_OUTPUT_DIRECTORY"
