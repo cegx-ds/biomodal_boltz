@@ -23,6 +23,7 @@ get_diagnostics
 BUCKET_NAME="biomodal-structural-bioinformatics"
 MOUNTED_BUCKET_FOLDING_DIRECTORY="/gcs/$BUCKET_NAME/vertex_runs/ntDRM2_input/$FOLDING_ID"
 MOUNTED_BUCKET_OUTPUT_DIRECTORY="/gcs/$BUCKET_NAME/vertex_runs/ntDRM2_output/$FOLDING_ID"
+mkdir --verbose --parents "$MOUNTED_BUCKET_OUTPUT_DIRECTORY"
 
 # create the local input directory
 LOCAL_INPUT_DIRECTORY="/data/vertex_runs/ntDRM2_input/$FOLDING_ID"
