@@ -45,7 +45,7 @@ def get_latest_image_uri(
     return image_uri
 
 
-def launch_folding_job(folder_id: str, job_region: str):
+def launch_folding_job(folder_id: str, job_region: str, use_spot: bool = False):
     if job_region == "europe-west2":
         image_uri = get_latest_image_uri(docker_registry = "europe-west2-docker.pkg.dev/prj-biomodal-forte/europe-ml-docker")
     elif "us" in job_region:
@@ -67,10 +67,7 @@ def launch_folding_job(folder_id: str, job_region: str):
     }
 
     vm_configuration = vm_configurations["L4"]
-
-    # launch folding job
-    subprocess.run(
-        [
+    command = [
             "gcloud",
             "ai",
             "custom-jobs",
@@ -84,7 +81,13 @@ def launch_folding_job(folder_id: str, job_region: str):
             f"accelerator-count={vm_configuration['accelerator-count']},"
             f"container-image-uri={image_uri}",
             f"--args={folder_id}",
-        ],
+        ]
+    if use_spot:
+        command.append("--config=config_for_spot.yaml")
+
+    # launch folding job
+    subprocess.run(
+        command,
         check=True,
     )
 
@@ -97,12 +100,16 @@ def main():
     argument_parser.add_argument(
         "--region", default="europe-west2", help="the region to use for this batch"
     )
+    argument_parser.add_argument(
+        "--use-spot", action="store_true", help="whether to use spot instances or not"
+    )
 
     args = argument_parser.parse_args()
 
     folder_id = args.folder_id
     region = args.region
-    launch_folding_job(folder_id, region)
+    use_spot = args.use_spot
+    launch_folding_job(folder_id, region, use_spot)
 
 
 if __name__ == "__main__":
