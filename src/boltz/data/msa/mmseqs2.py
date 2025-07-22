@@ -140,7 +140,6 @@ def run_mmseqs2(  # noqa: PLR0912, D103, C901, PLR0915
     seqs_unique = []
     # TODO this might be slow for large sets
     [seqs_unique.append(x) for x in seqs if x not in seqs_unique]
-    Ms = [N + seqs_unique.index(seq) for seq in seqs]
     # lets do it!
     if not os.path.isfile(tar_gz_file):
         TIME_ESTIMATE = 150 * len(seqs_unique)
@@ -175,12 +174,19 @@ def run_mmseqs2(  # noqa: PLR0912, D103, C901, PLR0915
                 # wait for job to finish
                 ID, TIME = out["id"], 0
                 pbar.set_description(out["status"])
+                pending_waiting_time = 0
                 while out["status"] in ["UNKNOWN", "RUNNING", "PENDING"]:
+                    print(out)
                     t = 5 + random.randint(0, 5)
+                    pending_waiting_time += t
                     logger.error(f"Sleeping for {t}s. Reason: {out['status']}")
                     time.sleep(t)
                     out = status(ID)
                     pbar.set_description(out["status"])
+                    if pending_waiting_time > 150:
+                        pbar.set_description("RESUBMIT")
+                        N = N + 1
+                        break
                     if out["status"] == "RUNNING":
                         TIME += t
                         pbar.update(n=t)
@@ -216,6 +222,7 @@ def run_mmseqs2(  # noqa: PLR0912, D103, C901, PLR0915
             tar_gz.extractall(path)
 
     # gather a3m lines
+    Ms = [N + seqs_unique.index(seq) for seq in seqs]
     a3m_lines = {}
     for a3m_file in a3m_files:
         update_M, M = True, None
