@@ -114,7 +114,7 @@ def main():
 
     folder_id = args.folder_id
     parent_folder = args.parent_folder
-    operation = args.command
+    operation = args.operation
     region = args.region
     use_spot = args.use_spot
     launch_folding_job(folder_id, parent_folder, operation, region, use_spot)
