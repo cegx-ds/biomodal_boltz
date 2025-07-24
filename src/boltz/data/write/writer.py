@@ -157,21 +157,16 @@ class BoltzWriter(BasePredictionWriter):
                 outname = f"{record.id}_model_{idx_to_rank[model_idx]}"
 
                 # Save the structure
-                if self.output_format == "pdb":
-                    path = struct_dir / f"{outname}.pdb"
-                    with path.open("w") as f:
-                        f.write(
-                            to_pdb(new_structure, plddts=plddts, boltz2=self.boltz2)
-                        )
-                elif self.output_format == "mmcif":
-                    path = struct_dir / f"{outname}.cif"
-                    with path.open("w") as f:
-                        f.write(
-                            to_mmcif(new_structure, plddts=plddts, boltz2=self.boltz2)
-                        )
-                else:
-                    path = struct_dir / f"{outname}.npz"
-                    np.savez_compressed(path, **asdict(new_structure))
+                path = struct_dir / f"{outname}.pdb"
+                with path.open("w") as f:
+                    f.write(
+                        to_pdb(new_structure, plddts=plddts, boltz2=self.boltz2)
+                    )
+                path = struct_dir / f"{outname}.cif"
+                with path.open("w") as f:
+                    f.write(
+                        to_mmcif(new_structure, plddts=plddts, boltz2=self.boltz2)
+                    )
 
                 if self.boltz2 and record.affinity:
                     path = struct_dir / f"pre_affinity_{record.id}_model_{idx_to_rank[model_idx]}.npz"
