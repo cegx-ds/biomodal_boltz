@@ -154,7 +154,11 @@ class BoltzWriter(BasePredictionWriter):
                     plddts = prediction["plddt"][model_idx]
 
                 # Create path name
-                outname = f"{record.id}_model_{idx_to_rank[model_idx]}"
+                if hasattr(record, "n_copy"):
+                    outname = f"{record.id}_run_{record.n_copy}_model_{idx_to_rank[model_idx]}"
+                else:
+                    outname = f"{record.id}_model_{idx_to_rank[model_idx]}"
+                
 
                 # Save the structure
                 path = struct_dir / f"{outname}.pdb"
@@ -175,10 +179,13 @@ class BoltzWriter(BasePredictionWriter):
 
                 # Save confidence summary
                 if "plddt" in prediction:
-                    path = (
-                        struct_dir
-                        / f"confidence_{record.id}_model_{idx_to_rank[model_idx]}.json"
-                    )
+                    if hasattr(record, "n_copy"):
+                        path = struct_dir / f"confidence_{record.id}_run_{record.n_copy}_model_{idx_to_rank[model_idx]}.json"
+                    else:
+                        path = (
+                            struct_dir
+                            / f"confidence_{record.id}_model_{idx_to_rank[model_idx]}.json"
+                        )
                     confidence_summary_dict = {}
                     for key in [
                         "confidence_score",

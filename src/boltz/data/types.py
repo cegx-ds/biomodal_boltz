@@ -574,7 +574,7 @@ class Record(JSONSerializable):
     templates: Optional[list[TemplateInfo]] = None
     md: Optional[MDInfo] = None
     affinity: Optional[AffinityInfo] = None
-    preaffinity: Optional[str] = None
+    pre_affinity: Optional[str] = None
 
 
 ####################################################################################################

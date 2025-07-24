@@ -45,7 +45,7 @@ def get_latest_image_uri(
     return image_uri
 
 
-def launch_folding_job(folder_id: str, job_region: str, use_spot: bool = False):
+def launch_folding_job(folder_id: str, parent_folder: str, operation: str, job_region: str, use_spot: bool = False):
     if job_region == "europe-west2":
         image_uri = get_latest_image_uri(docker_registry = "europe-west2-docker.pkg.dev/prj-biomodal-forte/europe-ml-docker")
     elif "us" in job_region:
@@ -80,7 +80,7 @@ def launch_folding_job(folder_id: str, job_region: str, use_spot: bool = False):
             f"replica-count={vm_configuration['replica_count']},"
             f"accelerator-count={vm_configuration['accelerator-count']},"
             f"container-image-uri={image_uri}",
-            f"--args={folder_id}",
+            f"--args={folder_id},{parent_folder},{operation}",
         ]
     if use_spot:
         command.append("--config=config_for_spot.yaml")
@@ -98,6 +98,12 @@ def main():
         "--folder_id", help="the folder id containing the yaml for this batch"
     )
     argument_parser.add_argument(
+        "--parent_folder", help="the folder id containing the parent folder for this run"
+    )
+    argument_parser.add_argument(
+        "--operation", help="the operation id to run for this batch"
+    )
+    argument_parser.add_argument(
         "--region", default="europe-west2", help="the region to use for this batch"
     )
     argument_parser.add_argument(
@@ -107,9 +113,11 @@ def main():
     args = argument_parser.parse_args()
 
     folder_id = args.folder_id
+    parent_folder = args.parent_folder
+    operation = args.command
     region = args.region
     use_spot = args.use_spot
-    launch_folding_job(folder_id, region, use_spot)
+    launch_folding_job(folder_id, parent_folder, operation, region, use_spot)
 
 
 if __name__ == "__main__":
