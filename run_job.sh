@@ -48,6 +48,7 @@ if [[ $OPERATION == "affinity" ]]; then
         --diffusion_samples_affinity 10 \
         --sampling_steps 400 \
         --sampling_steps_affinity 400 \
+        --use_potentials \
         --devices 4 \
         --num_workers 4 \
         --cache "/app/.boltz" \
@@ -63,11 +64,12 @@ elif [[ $OPERATION == "generate_replicate_examples" ]]; then
         --diffusion_samples_affinity 10 \
         --sampling_steps 400 \
         --sampling_steps_affinity 400 \
+        --use_potentials \
         --devices 4 \
         --num_workers 4 \
         --cache "/app/.boltz" \
         --out_dir "$FOLDING_DIRECTORY" \
-        --multiple_fold 50
+        --multiple_fold 20
 
 fi
 # save folding output files

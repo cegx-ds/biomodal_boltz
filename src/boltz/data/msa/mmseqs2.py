@@ -190,6 +190,7 @@ def run_mmseqs2(  # noqa: PLR0912, D103, C901, PLR0915
     # TODO this might be slow for large sets
     [seqs_unique.append(x) for x in seqs if x not in seqs_unique]
     # lets do it!
+    error_count = 0
     if not os.path.isfile(tar_gz_file):
         TIME_ESTIMATE = 150 * len(seqs_unique)
         with tqdm(total=TIME_ESTIMATE, bar_format=TQDM_BAR_FORMAT) as pbar:
@@ -206,12 +207,20 @@ def run_mmseqs2(  # noqa: PLR0912, D103, C901, PLR0915
                     out = submit(seqs_unique, mode, N)
 
                 if out["status"] == "ERROR":
+                    error_count += 1
+                    time.sleep(5)
+                    if error_count > 5:
+                        logger.error(f"Too many errors ({error_count}) for ID: {ID}. Stopping.")
+                        raise Exception(
+                            "Too many failed attempts for the MSA generation request."
+                        )
                     msg = (
                         "MMseqs2 API is giving errors. Please confirm your "
                         " input is a valid protein sequence. If error persists, "
                         "please try again an hour later."
                     )
-                    raise Exception(msg)
+                    logger.error(msg)
+                    continue
 
                 if out["status"] == "MAINTENANCE":
                     msg = (
@@ -248,13 +257,19 @@ def run_mmseqs2(  # noqa: PLR0912, D103, C901, PLR0915
                     REDO = False
 
                 if out["status"] == "ERROR":
-                    REDO = False
+                    error_count += 1
+                    time.sleep(5)
+                    if error_count > 5:
+                        logger.error(f"Too many errors ({error_count}) for ID: {ID}. Stopping.")
+                        raise Exception(
+                            "Too many failed attempts for the MSA generation request."
+                        )
                     msg = (
                         "MMseqs2 API is giving errors. Please confirm your "
                         " input is a valid protein sequence. If error persists, "
                         "please try again an hour later."
                     )
-                    raise Exception(msg)
+                    logger.error(msg)
 
             # Download results
             download(ID, tar_gz_file)
