@@ -43,11 +43,11 @@ if [[ $OPERATION == "affinity" ]]; then
     boltz predict \
         $LOCAL_INPUT_DIRECTORY \
         --use_msa_server \
-        --recycling_steps 8 \
-        --diffusion_samples 10 \
-        --diffusion_samples_affinity 10 \
-        --sampling_steps 400 \
-        --sampling_steps_affinity 400 \
+        --recycling_steps 6 \
+        --diffusion_samples 6 \
+        --diffusion_samples_affinity 6 \
+        --sampling_steps 300 \
+        --sampling_steps_affinity 300 \
         --use_potentials \
         --devices 4 \
         --num_workers 4 \
@@ -59,11 +59,11 @@ elif [[ $OPERATION == "generate_replicate_examples" ]]; then
     boltz predict \
         $LOCAL_INPUT_DIRECTORY \
         --use_msa_server \
-        --recycling_steps 8 \
-        --diffusion_samples 10 \
-        --diffusion_samples_affinity 10 \
-        --sampling_steps 400 \
-        --sampling_steps_affinity 400 \
+        --recycling_steps 6 \
+        --diffusion_samples 6 \
+        --diffusion_samples_affinity 6 \
+        --sampling_steps 300 \
+        --sampling_steps_affinity 300 \
         --use_potentials \
         --devices 4 \
         --num_workers 4 \
