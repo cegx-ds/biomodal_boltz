@@ -1,0 +1,3 @@
+scheduling:
+  strategy: SPOT
+  restartJobOnWorkerRestart: True

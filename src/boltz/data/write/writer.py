@@ -156,36 +156,38 @@ class BoltzWriter(BasePredictionWriter):
                     plddts = prediction["plddt"][model_idx]
 
                 # Create path name
-                outname = f"{record.id}_model_{idx_to_rank[model_idx]}"
+                if hasattr(record, "n_copy"):
+                    outname = f"{record.id}_run_{record.n_copy}_model_{idx_to_rank[model_idx]}"
+                else:
+                    outname = f"{record.id}_model_{idx_to_rank[model_idx]}"
+                
 
                 # Save the structure
-                if self.output_format == "pdb":
-                    path = struct_dir / f"{outname}.pdb"
-                    with path.open("w") as f:
-                        f.write(
-                            to_pdb(new_structure, plddts=plddts, boltz2=self.boltz2)
-                        )
-                elif self.output_format == "mmcif":
-                    path = struct_dir / f"{outname}.cif"
-                    with path.open("w") as f:
-                        f.write(
-                            to_mmcif(new_structure, plddts=plddts, boltz2=self.boltz2)
-                        )
-                else:
-                    path = struct_dir / f"{outname}.npz"
-                    np.savez_compressed(path, **asdict(new_structure))
+                path = struct_dir / f"{outname}.pdb"
+                with path.open("w") as f:
+                    f.write(
+                        to_pdb(new_structure, plddts=plddts, boltz2=self.boltz2)
+                    )
+                path = struct_dir / f"{outname}.cif"
+                with path.open("w") as f:
+                    f.write(
+                        to_mmcif(new_structure, plddts=plddts, boltz2=self.boltz2)
+                    )
 
-                if self.boltz2 and record.affinity and idx_to_rank[model_idx] == 0:
-                    path = struct_dir / f"pre_affinity_{record.id}.npz"
+                if self.boltz2 and record.affinity:
+                    path = struct_dir / f"pre_affinity_{record.id}_model_{idx_to_rank[model_idx]}.npz"
                     np.savez_compressed(path, **asdict(new_structure))
                     np.array(atoms["coords"][:, None], dtype=Coords)
 
                 # Save confidence summary
                 if "plddt" in prediction:
-                    path = (
-                        struct_dir
-                        / f"confidence_{record.id}_model_{idx_to_rank[model_idx]}.json"
-                    )
+                    if hasattr(record, "n_copy"):
+                        path = struct_dir / f"confidence_{record.id}_run_{record.n_copy}_model_{idx_to_rank[model_idx]}.json"
+                    else:
+                        path = (
+                            struct_dir
+                            / f"confidence_{record.id}_model_{idx_to_rank[model_idx]}.json"
+                        )
                     confidence_summary_dict = {}
                     for key in [
                         "confidence_score",
@@ -305,31 +307,52 @@ class BoltzAffinityWriter(BasePredictionWriter):
             return
         # Dump affinity summary
         affinity_summary = {}
+        if prediction["iptm"].numel() > 1:
+            # Multiple samples: report all individual values
+            affinity_summary["iptm"] = prediction["iptm"].squeeze().cpu().numpy().tolist()
+        else:
+            # Single sample: keep original format for compatibility
+            affinity_summary["iptm"] = prediction["iptm"].item()
         pred_affinity_value = prediction["affinity_pred_value"]
         pred_affinity_probability = prediction["affinity_probability_binary"]
-        affinity_summary = {
-            "affinity_pred_value": pred_affinity_value.item(),
-            "affinity_probability_binary": pred_affinity_probability.item(),
-        }
+        
+        # Handle multiple diffusion samples
+        if pred_affinity_value.numel() > 1:
+            # Multiple samples: report all individual values
+            affinity_summary["affinity_pred_value"] = pred_affinity_value.squeeze().cpu().numpy().tolist()
+            affinity_summary["affinity_probability_binary"] = pred_affinity_probability.squeeze().cpu().numpy().tolist()
+        else:
+            # Single sample: keep original format for compatibility
+            affinity_summary["affinity_pred_value"] = pred_affinity_value.item()
+            affinity_summary["affinity_probability_binary"] = pred_affinity_probability.item()
+
         if "affinity_pred_value1" in prediction:
             pred_affinity_value1 = prediction["affinity_pred_value1"]
             pred_affinity_probability1 = prediction["affinity_probability_binary1"]
             pred_affinity_value2 = prediction["affinity_pred_value2"]
             pred_affinity_probability2 = prediction["affinity_probability_binary2"]
-            affinity_summary["affinity_pred_value1"] = pred_affinity_value1.item()
-            affinity_summary["affinity_probability_binary1"] = (
-                pred_affinity_probability1.item()
-            )
-            affinity_summary["affinity_pred_value2"] = pred_affinity_value2.item()
-            affinity_summary["affinity_probability_binary2"] = (
-                pred_affinity_probability2.item()
-            )
+            
+            if pred_affinity_value1.numel() > 1:
+                # Multiple samples for ensemble models
+                affinity_summary["affinity_pred_value1"] = pred_affinity_value1.squeeze().cpu().numpy().tolist()
+                affinity_summary["affinity_probability_binary1"] = pred_affinity_probability1.squeeze().cpu().numpy().tolist()
+                affinity_summary["affinity_pred_value2"] = pred_affinity_value2.squeeze().cpu().numpy().tolist()
+                affinity_summary["affinity_probability_binary2"] = pred_affinity_probability2.squeeze().cpu().numpy().tolist()
+            else:
+                # Single sample for ensemble models
+                affinity_summary["affinity_pred_value1"] = pred_affinity_value1.item()
+                affinity_summary["affinity_probability_binary1"] = (
+                    pred_affinity_probability1.item()
+                )
+                affinity_summary["affinity_pred_value2"] = pred_affinity_value2.item()
+                affinity_summary["affinity_probability_binary2"] = (
+                    pred_affinity_probability2.item()
+                )
 
         # Save the affinity summary
         struct_dir = self.output_dir / batch["record"][0].id
         struct_dir.mkdir(exist_ok=True)
-        path = struct_dir / f"affinity_{batch['record'][0].id}.json"
-
+        path = struct_dir / f"affinity_{batch['record'][0].pre_affinity}.json"
         with path.open("w") as f:
             f.write(json.dumps(affinity_summary, indent=4))
 

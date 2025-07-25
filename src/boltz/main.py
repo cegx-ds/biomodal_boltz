@@ -10,6 +10,7 @@ from functools import partial
 from multiprocessing import Pool
 from pathlib import Path
 from typing import Literal, Optional
+from copy import deepcopy
 
 import click
 import torch
@@ -398,6 +399,7 @@ def filter_inputs_affinity(
     if existing and not override:
         manifest = Manifest([r for r in manifest.records if r.id not in existing])
         num_skipped = len(existing)
+        manifest = Manifest([r for r in manifest.records if r.id not in existing])
         msg = (
             f"Found some existing affinity predictions ({num_skipped}), "
             f"skipping and running only the missing ones, "
@@ -1039,6 +1041,12 @@ def cli() -> None:
     is_flag=True,
     help=" to dump the s and z embeddings into a npz file. Default is False.",
 )
+@click.option(
+    "--multiple_fold",
+    type=int,
+    help="Use to fold the protein multiple times. Only use to do folding, will disable affinity prediction.",
+    default=1,
+)
 def predict(  # noqa: C901, PLR0915, PLR0912
     data: str,
     out_dir: str,
@@ -1077,6 +1085,7 @@ def predict(  # noqa: C901, PLR0915, PLR0912
     num_subsampled_msa: int = 1024,
     no_kernels: bool = False,
     write_embeddings: bool = False,
+    multiple_fold: int = 1,
 ) -> None:
     """Run predictions with Boltz."""
     # If cpu, write a friendly warning
@@ -1185,6 +1194,19 @@ def predict(  # noqa: C901, PLR0915, PLR0912
         outdir=out_dir,
         override=override,
     )
+
+    def duplicate_manifest_to_multiple_folds(manifest, n_samples: int) -> Manifest:
+        new_records = []
+        for record in manifest.records:
+            for i in range(n_samples):
+                new_record = deepcopy(record)
+                new_record.n_copy = i
+                new_records.append(new_record)
+        return Manifest(new_records)
+    if multiple_fold > 1:
+        filtered_manifest = duplicate_manifest_to_multiple_folds(
+            filtered_manifest, multiple_fold
+        )
 
     # Load processed data
     processed_dir = out_dir / "processed"
@@ -1331,6 +1353,10 @@ def predict(  # noqa: C901, PLR0915, PLR0912
             datamodule=data_module,
             return_predictions=False,
         )
+    if multiple_fold > 1:
+        # end programm
+        click.echo("Multiple folding is done, exiting.")
+        return None
 
     # Check if affinity predictions are needed
     if any(r.affinity for r in manifest.records):
@@ -1350,6 +1376,19 @@ def predict(  # noqa: C901, PLR0915, PLR0912
         msg = f"Running affinity prediction for {len(manifest_filtered.records)} input"
         msg += "s." if len(manifest_filtered.records) > 1 else "."
         click.echo(msg)
+
+        # print(manifest_filtered)
+        def _change_manifest_to_include_all_predictions(manifest: Manifest, n_samples) -> Manifest:
+            """Change the manifest to include all predictions."""
+            new_records = []
+            for record in manifest.records:
+                for i in range(n_samples):
+                    new_record = deepcopy(record)
+                    new_record.pre_affinity = f"{record.id}_model_{i}"
+                    new_records.append(new_record)
+            return Manifest(new_records)
+        manifest_filtered = _change_manifest_to_include_all_predictions(manifest_filtered, diffusion_samples)
+        # print(manifest_filtered)
 
         pred_writer = BoltzAffinityWriter(
             data_dir=processed.targets_dir,

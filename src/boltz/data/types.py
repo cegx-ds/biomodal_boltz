@@ -569,7 +569,7 @@ class AffinityInfo:
     mw: float
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=False)
 class Record(JSONSerializable):
     """Record datatype."""
 
@@ -581,6 +581,7 @@ class Record(JSONSerializable):
     templates: Optional[list[TemplateInfo]] = None
     md: Optional[MDInfo] = None
     affinity: Optional[AffinityInfo] = None
+    pre_affinity: Optional[str] = None
 
 
 ####################################################################################################
@@ -650,7 +651,7 @@ class Target:
     extra_mols: Optional[dict[str, Mol]] = None
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=False)
 class Manifest(JSONSerializable):
     """Manifest datatype."""
 
