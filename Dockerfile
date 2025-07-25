@@ -21,7 +21,7 @@ COPY . /app
 
 RUN source "/app/conda/etc/profile.d/conda.sh" && \
     conda activate "/app/boltz_conda" && \
-    pip install . && \
+    pip install .[cuda] && \
     conda clean -afy
 
 ENTRYPOINT ["bash", "/app/run_job.sh"]
