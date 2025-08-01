@@ -63,10 +63,17 @@ def launch_folding_job(folder_id: str, parent_folder: str, operation: str, job_r
             "accelerator_type": "NVIDIA_L4",
             "accelerator-count": 4,
             "replica_count": 1,
+        },        
+        "L4_single": {
+            # 1 NVIDIA L4 24GB GPU, 12 vCPUs, 48GB RAM
+            "machine_type": "g2-standard-12",
+            "accelerator_type": "NVIDIA_L4",
+            "accelerator-count": 1,
+            "replica_count": 1,
         },
     }
 
-    vm_configuration = vm_configurations["L4"]
+    vm_configuration = vm_configurations["L4_single"]
     command = [
             "gcloud",
             "ai",

@@ -7,6 +7,23 @@ from torch import Tensor
 from boltz.data import const
 from boltz.data.types import Structure
 
+def _get_chain_rename_dict(chains):
+    """Create a dictionary to rename chains in alphabetical order."""
+    chain_rename_dict = {}
+    for chain in [x["name"] for x in chains]:
+        first_letter = chain[0].upper()
+        if first_letter not in chain_rename_dict.values():
+            chain_rename_dict[chain] = first_letter
+        else:
+            # If the first letter already exists, try the next letter.
+            i = 1
+            while chr(ord(first_letter) + i) in chain_rename_dict.values():
+                i += 1
+            chain_rename_dict[chain] = chr(ord(first_letter) + i)
+
+    return chain_rename_dict
+
+
 
 def to_pdb(
     structure: Structure,
@@ -42,11 +59,14 @@ def to_pdb(
     # Tracks ligand indices.
     ligand_index_offset = 0
 
+    # Create a chain rename dictionary to ensure unique chain names.
+    chain_rename_dict = _get_chain_rename_dict(structure.chains)
+
     # Add all atom sites.
     for chain in structure.chains:
         # We rename the chains in alphabetical order
         chain_idx = chain["asym_id"]
-        chain_tag = chain["name"]
+        chain_tag = chain_rename_dict[chain["name"]]
 
         res_start = chain["res_idx"]
         res_end = chain["res_idx"] + chain["res_num"]

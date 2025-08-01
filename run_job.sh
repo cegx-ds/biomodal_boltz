@@ -38,19 +38,24 @@ mkdir --verbose --parents "$FOLDING_DIRECTORY"
 
 source "/app/conda/etc/profile.d/conda.sh" && conda activate "/app/boltz_conda"
 
+# get number of gpus 
+ngpus=$(nvidia-smi --query-gpu=name --format=csv,noheader | wc -l)
+echo "Number of GPUs available: $ngpus"
+
 if [[ $OPERATION == "affinity" ]]; then
     echo "Running affinity prediction for $FOLDING_ID"
     boltz predict \
         $LOCAL_INPUT_DIRECTORY \
         --use_msa_server \
-        --recycling_steps 6 \
-        --diffusion_samples 6 \
-        --diffusion_samples_affinity 6 \
-        --sampling_steps 300 \
-        --sampling_steps_affinity 300 \
+        --recycling_steps 8 \
+        --diffusion_samples 20 \
+        --diffusion_samples_affinity 10 \
+        --sampling_steps 400 \
+        --sampling_steps_affinity 400 \
         --use_potentials \
-        --devices 4 \
-        --num_workers 4 \
+        --devices $ngpus \
+        --max_parallel_samples 1 \
+        --num_workers $ngpus \
         --cache "/app/.boltz" \
         --out_dir "$FOLDING_DIRECTORY"
 
@@ -59,14 +64,13 @@ elif [[ $OPERATION == "generate_replicate_examples" ]]; then
     boltz predict \
         $LOCAL_INPUT_DIRECTORY \
         --use_msa_server \
-        --recycling_steps 6 \
-        --diffusion_samples 6 \
-        --diffusion_samples_affinity 6 \
-        --sampling_steps 300 \
-        --sampling_steps_affinity 300 \
+        --recycling_steps 8 \
+        --diffusion_samples 20 \
+        --sampling_steps 400 \
         --use_potentials \
-        --devices 4 \
-        --num_workers 4 \
+        --devices $ngpus \
+        --max_parallel_samples 1 \
+        --num_workers $ngpus \
         --cache "/app/.boltz" \
         --out_dir "$FOLDING_DIRECTORY" \
         --multiple_fold 20
