@@ -242,7 +242,7 @@ def run_mmseqs2(  # noqa: PLR0912, D103, C901, PLR0915
                     time.sleep(t)
                     out = status(ID)
                     pbar.set_description(out["status"])
-                    if pending_waiting_time > 150:
+                    if pending_waiting_time > 300000: # effectively disable this for now
                         pbar.set_description("RESUBMIT")
                         N = N + 1
                         break

@@ -1,3 +1,6 @@
 scheduling:
   strategy: SPOT
   restartJobOnWorkerRestart: True
+workerPoolSpecs:
+  diskSpec:
+    bootDiskSizeGb: 200

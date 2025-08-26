@@ -1,0 +1,3 @@
+workerPoolSpecs:
+  diskSpec:
+    bootDiskSizeGb: 200
