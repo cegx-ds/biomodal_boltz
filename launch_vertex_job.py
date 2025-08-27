@@ -46,12 +46,12 @@ def get_latest_image_uri(
 
 
 def launch_folding_job(folder_id: str, parent_folder: str, operation: str, job_region: str, use_spot: bool = False):
-    if job_region == "europe-west2":
-        image_uri = get_latest_image_uri(docker_registry = "europe-west2-docker.pkg.dev/prj-biomodal-forte/europe-ml-docker")
-    elif "us" in job_region:
-        image_uri = get_latest_image_uri(docker_registry = "us-docker.pkg.dev/prj-biomodal-forte/us-ml-docker")
-    else:
-        image_uri = get_latest_image_uri(docker_registry = "europe-west2-docker.pkg.dev/prj-biomodal-forte/europe-ml-docker")
+    # if job_region == "europe-west2":
+    #     image_uri = get_latest_image_uri(docker_registry = "europe-west2-docker.pkg.dev/prj-biomodal-forte/europe-ml-docker")
+    # elif "us" in job_region:
+    #     image_uri = get_latest_image_uri(docker_registry = "us-docker.pkg.dev/prj-biomodal-forte/us-ml-docker")
+    # else:
+    #     image_uri = get_latest_image_uri(docker_registry = "europe-west2-docker.pkg.dev/prj-biomodal-forte/europe-ml-docker")
 
     datetime_now = dt.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
     job_name = f"biomodal_boltz.{folder_id}.{datetime_now}"
@@ -82,17 +82,13 @@ def launch_folding_job(folder_id: str, parent_folder: str, operation: str, job_r
             f"--project=prj-biomodal-forte",
             f"--display-name={job_name}",
             f"--region={job_region}",
-            f"--worker-pool-spec=machine-type={vm_configuration['machine_type']},"
-            f"accelerator-type={vm_configuration['accelerator_type']},"
-            f"replica-count={vm_configuration['replica_count']},"
-            f"accelerator-count={vm_configuration['accelerator-count']},"
-            f"container-image-uri={image_uri}",
             f"--args={folder_id},{parent_folder},{operation}",
         ]
-    if use_spot:
-        command.append("--config=config_for_spot.yaml")
-    else:
-        command.append("--config=config_for_normal.yaml")
+    if "us" in job_region:
+        if use_spot:
+            command.append("--config=config_for_spot_us.yaml")
+        else:
+            command.append("--config=config_for_normal_us.yaml")
 
     # launch folding job
     subprocess.run(

@@ -55,7 +55,7 @@ if [[ $OPERATION == "affinity" ]]; then
         --use_potentials \
         --devices $ngpus \
         --max_parallel_samples 1 \
-        --msa_server_url http://10.138.0.5 \
+        --msa_server_url http://34.187.173.12 \
         --num_workers $ngpus \
         --cache "/app/.boltz" \
         --out_dir "$FOLDING_DIRECTORY"
@@ -71,7 +71,7 @@ elif [[ $OPERATION == "generate_replicate_examples" ]]; then
         --use_potentials \
         --devices $ngpus \
         --max_parallel_samples 1 \
-        --msa_server_url http://10.138.0.5 \
+        --msa_server_url http://34.187.173.12 \
         --num_workers $ngpus \
         --cache "/app/.boltz" \
         --out_dir "$FOLDING_DIRECTORY" \
@@ -88,7 +88,7 @@ elif [[ $OPERATION == "generate_replicate_examples_boltz1" ]]; then
         --use_potentials \
         --devices $ngpus \
         --max_parallel_samples 1 \
-        --msa_server_url http://10.138.0.5 \
+        --msa_server_url http://34.187.173.12 \
         --num_workers $ngpus \
         --cache "/app/.boltz" \
         --out_dir "$FOLDING_DIRECTORY" \

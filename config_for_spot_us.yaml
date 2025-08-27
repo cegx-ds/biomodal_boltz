@@ -1,0 +1,13 @@
+scheduling:
+  strategy: SPOT
+  restartJobOnWorkerRestart: True
+workerPoolSpecs:
+  diskSpec:
+    bootDiskSizeGb: 200
+  machineSpec:
+    machineType: g2-standard-12
+    acceleratorType: NVIDIA_L4
+    acceleratorCount: 1
+  replicaCount: 1
+  containerSpec:
+      imageUri: us-docker.pkg.dev/prj-biomodal-forte/us-ml-docker/test_boltz:0.0.2

@@ -25,9 +25,8 @@ import subprocess
 #         print(f"Position {i} misses predictions.")
 #         subprocess.run(f"python launch_vertex_job.py --folder_id ntDRM2_with_SAH_{i} --region us-west1 ", shell=True)
 
-for i in range(59,106):
+for i in range(61,106):
     files = glob.glob(f"/home/chenfushi/biomodal-structural-bioinformatics/vertex_runs/walraj_analogs_output/processing_group_{i}/predictions/*")
     if len(files) < 10:
         subprocess.run(f"python launch_vertex_job.py --parent_folder walraj_analogs --folder_id processing_group_{i} --region us-west1 --operation affinity", shell=True)
         print(i)
-        break

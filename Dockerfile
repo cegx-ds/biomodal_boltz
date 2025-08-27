@@ -17,7 +17,10 @@ RUN source "/app/conda/etc/profile.d/conda.sh" && \
     conda create -y -p "/app/boltz_conda" -c conda-forge -c bioconda \
     git python=3.11
 
-COPY . /app
+COPY run_job.sh pyproject.toml /app
+COPY src /app/src
+COPY scripts /app/scripts
+COPY .boltz /app/.boltz
 
 RUN source "/app/conda/etc/profile.d/conda.sh" && \
     conda activate "/app/boltz_conda" && \
