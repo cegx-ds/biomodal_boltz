@@ -55,10 +55,29 @@ if [[ $OPERATION == "affinity" ]]; then
         --use_potentials \
         --devices $ngpus \
         --max_parallel_samples 1 \
-        --msa_server_url http://34.187.173.12 \
+        --msa_server_url http://10.138.0.5 \
         --num_workers $ngpus \
         --cache "/app/.boltz" \
         --out_dir "$FOLDING_DIRECTORY"
+
+elif [[ $OPERATION == "affinity_boltz1" ]]; then
+    echo "Running affinity boltz1 prediction for $FOLDING_ID"
+    boltz predict \
+        $LOCAL_INPUT_DIRECTORY \
+        --use_msa_server \
+        --recycling_steps 8 \
+        --diffusion_samples 16 \
+        --diffusion_samples_affinity 8 \
+        --sampling_steps 300 \
+        --sampling_steps_affinity 300 \
+        --use_potentials \
+        --devices $ngpus \
+        --max_parallel_samples 1 \
+        --msa_server_url http://10.138.0.5 \
+        --num_workers $ngpus \
+        --cache "/app/.boltz" \
+        --out_dir "$FOLDING_DIRECTORY" \
+        --model boltz1
 
 elif [[ $OPERATION == "generate_replicate_examples" ]]; then
     echo "Running many folds prediction for $FOLDING_ID"
@@ -71,7 +90,7 @@ elif [[ $OPERATION == "generate_replicate_examples" ]]; then
         --use_potentials \
         --devices $ngpus \
         --max_parallel_samples 1 \
-        --msa_server_url http://34.187.173.12 \
+        --msa_server_url http://10.138.0.5 \
         --num_workers $ngpus \
         --cache "/app/.boltz" \
         --out_dir "$FOLDING_DIRECTORY" \
@@ -88,13 +107,12 @@ elif [[ $OPERATION == "generate_replicate_examples_boltz1" ]]; then
         --use_potentials \
         --devices $ngpus \
         --max_parallel_samples 1 \
-        --msa_server_url http://34.187.173.12 \
+        --msa_server_url http://10.138.0.5 \
         --num_workers $ngpus \
         --cache "/app/.boltz" \
         --out_dir "$FOLDING_DIRECTORY" \
         --multiple_fold 20 \
         --model boltz1
-
 
 fi
 # save folding output files

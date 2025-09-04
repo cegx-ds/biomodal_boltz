@@ -89,6 +89,11 @@ def launch_folding_job(folder_id: str, parent_folder: str, operation: str, job_r
             command.append("--config=config_for_spot_us.yaml")
         else:
             command.append("--config=config_for_normal_us.yaml")
+    else:
+        if use_spot:
+            command.append("--config=config_for_spot_eu.yaml")
+        else:
+            command.append("--config=config_for_normal_eu.yaml")
 
     # launch folding job
     subprocess.run(

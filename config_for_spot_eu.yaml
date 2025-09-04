@@ -10,6 +10,6 @@ workerPoolSpecs:
     acceleratorCount: 1
   replicaCount: 1
   containerSpec:
-      imageUri: us-docker.pkg.dev/prj-biomodal-forte/us-ml-docker/test_boltz:0.0.2
+      imageUri: europe-west2-docker.pkg.dev/prj-biomodal-forte/europe-ml-docker/test_boltz:0.0.2
 pscInterfaceConfig:
   networkAttachment: projects/prj-biomodal-forte/regions/us-west1/networkAttachments/na-vertex-ai-training
